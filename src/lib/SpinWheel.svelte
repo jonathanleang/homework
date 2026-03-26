@@ -7,15 +7,21 @@
   let result = null
   let sayWinner = true
   const MIN_SEG = 1
-  const MAX_SEG = 10000
-  $: seg = Math.max(MIN_SEG, Math.min(MAX_SEG, Math.floor(segments || MIN_SEG)))
+  $: seg = Math.max(MIN_SEG, Math.floor(segments || MIN_SEG))
   $: step = 360 / seg
-  const maxLabels = 60
-  $: labelStep = Math.max(1, Math.ceil(seg / maxLabels))
-  $: labelIndices = Array.from({ length: Math.ceil(seg / labelStep) }, (_, k) => {
-    const i = k * labelStep
-    return i < seg ? i : null
-  }).filter((v) => v !== null)
+  $: wheelBg =
+    seg > 500
+      ? 'conic-gradient(#ef4444, #f97316, #facc15, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444)'
+      : 'repeating-conic-gradient(#fde68a 0 var(--a), #fca5a5 0 calc(var(--a) * 2))'
+  const maxLabels = 20
+  $: labelIndices = (() => {
+    if (seg <= maxLabels) return Array.from({ length: seg }, (_, i) => i)
+    const s = Math.max(1, Math.ceil((seg - 1) / (maxLabels - 1)))
+    const set = new Set()
+    for (let i = 0; i < seg; i += s) set.add(i)
+    set.add(seg - 1)
+    return Array.from(set).sort((a, b) => a - b)
+  })()
   function numberToWords(n) {
     const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine']
     const teens = ['ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
@@ -86,7 +92,6 @@
         type="number"
         bind:value={segments}
         min={MIN_SEG}
-        max={MAX_SEG}
         step="1"
         inputmode="numeric"
         pattern="\\d*"
@@ -96,13 +101,8 @@
             segments = MIN_SEG
             e.currentTarget.value = String(MIN_SEG)
           } else {
-            const c = Math.max(MIN_SEG, Math.min(MAX_SEG, v))
-            if (c !== v) {
-              segments = c
-              e.currentTarget.value = String(c)
-            } else {
-              segments = v
-            }
+            segments = Math.max(MIN_SEG, v)
+            if (segments !== v) e.currentTarget.value = String(segments)
           }
         }}
       />
@@ -115,7 +115,7 @@
   </div>
   <div class="stage">
     <div class="pointer"></div>
-    <div class="wheel" style="--a: {step}deg; background: repeating-conic-gradient(#fde68a 0 var(--a), #fca5a5 0 calc(var(--a) * 2)); transform: rotate({rotate}deg);" on:transitionend={done}>
+    <div class="wheel" style="--a: {step}deg; background: {wheelBg}; transform: rotate({rotate}deg);" on:transitionend={done}>
       {#each labelIndices as i}
         {#key seg + '-' + i}
           <span class="label" style="--angle: {(i * step + step / 2)}deg">{i + 1}</span>

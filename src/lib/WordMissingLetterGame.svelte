@@ -157,6 +157,8 @@
 
   const HISTORY_KEY = 'word_missing_history'
   const HISTORY_VIS_KEY = 'word_missing_history_show'
+  const CUSTOM_WORDS_KEY = 'word_missing_custom_words'
+  const USE_CUSTOM_KEY = 'word_missing_use_custom'
 
   let history = []
   let showHistory = true
@@ -168,6 +170,10 @@
   let isCorrect = false
   let score = 0
   let sayWord = true
+  let speakTimer = null
+  let useCustomWords = false
+  let customWordsText = ''
+  let showCustom = false
 
   $: total = history.length
   $: correctCount = history.reduce((n, h) => n + (h.correct ? 1 : 0), 0)
@@ -175,6 +181,9 @@
   $: correctPct = total ? Math.round((correctCount / total) * 100) : 0
   $: masked = word ? word.slice(0, missingIndex) + '_' + word.slice(missingIndex + 1) : ''
   $: correctLetter = word ? word[missingIndex] : ''
+  $: customWords = parseCustomWords(customWordsText)
+  $: activeWords = useCustomWords && customWords.length ? customWords : WORDS
+  $: wordSourceLabel = useCustomWords && customWords.length ? `Custom (${customWords.length})` : `Default (${WORDS.length})`
 
   function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
@@ -190,15 +199,38 @@
     return arr
   }
 
+  function normalizeWord(s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/[^a-z]/g, '')
+  }
+
+  function parseCustomWords(text) {
+    const raw = String(text || '')
+      .split(/[\n,]+/g)
+      .map((w) => normalizeWord(w).trim())
+      .filter((w) => w.length >= 3)
+    return Array.from(new Set(raw))
+  }
+
   function speak(text) {
     if (!sayWord) return
     if (!text) return
     if (typeof window === 'undefined') return
     if (!('speechSynthesis' in window)) return
+    if (speakTimer) {
+      clearTimeout(speakTimer)
+      speakTimer = null
+    }
     window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(text)
-    u.rate = 0.9
-    window.speechSynthesis.speak(u)
+    const toSay = ` ${String(text)}`
+    speakTimer = setTimeout(() => {
+      const u = new SpeechSynthesisUtterance(toSay)
+      u.rate = 0.9
+      u.lang = 'en-US'
+      window.speechSynthesis.speak(u)
+      speakTimer = null
+    }, 120)
   }
 
   function loadHistory() {
@@ -229,6 +261,40 @@
     saveHistory()
   }
 
+  function loadCustomWords() {
+    try {
+      const raw = localStorage.getItem(CUSTOM_WORDS_KEY)
+      if (raw != null) customWordsText = String(JSON.parse(raw) || '')
+    } catch {}
+    try {
+      const raw = localStorage.getItem(USE_CUSTOM_KEY)
+      if (raw != null) useCustomWords = !!JSON.parse(raw)
+    } catch {}
+  }
+
+  function saveCustomWords() {
+    try {
+      localStorage.setItem(CUSTOM_WORDS_KEY, JSON.stringify(customWordsText))
+    } catch {}
+    try {
+      localStorage.setItem(USE_CUSTOM_KEY, JSON.stringify(useCustomWords))
+    } catch {}
+  }
+
+  function applyCustomWords() {
+    customWordsText = customWords.join('\n')
+    useCustomWords = customWords.length > 0
+    saveCustomWords()
+    newRound()
+  }
+
+  function clearCustomWords() {
+    customWordsText = ''
+    useCustomWords = false
+    saveCustomWords()
+    newRound()
+  }
+
   function resetScore() {
     score = 0
   }
@@ -237,7 +303,7 @@
     message = ''
     isCorrect = false
     selected = ''
-    word = WORDS[randInt(0, WORDS.length - 1)]
+    word = activeWords[randInt(0, activeWords.length - 1)]
     missingIndex = word.length === 1 ? 0 : randInt(0, word.length - 1)
 
     const set = new Set([word[missingIndex]])
@@ -280,6 +346,12 @@
   onMount(() => {
     loadHistory()
     loadHistoryVisibility()
+    loadCustomWords()
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.getVoices()
+      }
+    } catch {}
     newRound()
   })
 </script>
@@ -289,10 +361,41 @@
     <div class="title">Missing Letter</div>
     <div class="desc">Pick the missing letter to complete the word</div>
     <div class="desc">Score: {score}</div>
+    <div class="desc">Words: {wordSourceLabel}</div>
     <label class="check">
       <input type="checkbox" bind:checked={sayWord} />
       <span class="check-label">Audio: say word</span>
     </label>
+  </div>
+
+  <div class="custom">
+    <div class="custom-head">
+      <button class="toggle" on:click={() => (showCustom = !showCustom)}>{showCustom ? 'Hide' : 'Custom Words'}</button>
+      <label class="check">
+        <input
+          type="checkbox"
+          bind:checked={useCustomWords}
+          on:change={() => {
+            saveCustomWords()
+            newRound()
+          }}
+          disabled={customWords.length === 0}
+        />
+        <span class="check-label">Use custom list ({customWords.length})</span>
+      </label>
+    </div>
+    {#if showCustom}
+      <textarea
+        class="words"
+        rows="6"
+        bind:value={customWordsText}
+        placeholder="Enter words (one per line or comma separated)\ncat\ndog\npencil"
+      ></textarea>
+      <div class="custom-actions">
+        <button on:click={applyCustomWords} disabled={customWords.length === 0}>Save</button>
+        <button on:click={clearCustomWords} disabled={!customWordsText}>Clear</button>
+      </div>
+    {/if}
   </div>
 
   <div class="card">
@@ -306,6 +409,7 @@
       <div class="msg" class:ok={isCorrect}>{message}</div>
     {/if}
     <div class="actions">
+      <button on:click={() => speak(word)} disabled={!word}>Say Again</button>
       <button on:click={newRound}>New</button>
       <button on:click={resetScore}>Reset Score</button>
     </div>
@@ -361,10 +465,80 @@
     align-items: center;
     gap: .4rem;
     user-select: none;
-    color: var(--text-h);
+    color: #111827;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: .35rem .55rem;
+    border-radius: .6rem;
   }
   .check-label {
     line-height: 1;
+    color: #111827;
+  }
+  .check input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 6px;
+    border: 2px solid #9ca3af;
+    background: #e5e7eb;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .check input[type="checkbox"]:checked {
+    background: #16a34a;
+    border-color: #16a34a;
+  }
+  .check input[type="checkbox"]:checked::after {
+    content: '';
+    width: 6px;
+    height: 12px;
+    border: solid #ffffff;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+    margin-top: -2px;
+  }
+  .check input[type="checkbox"]:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+  }
+  .custom {
+    width: min(92vw, 560px);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: .75rem;
+    display: grid;
+    gap: .5rem;
+  }
+  .custom-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .words {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    display: block;
+    resize: vertical;
+    padding: .6rem .7rem;
+    border-radius: .7rem;
+    border: 1px solid #d1d5db;
+    background: #f3f4f6;
+    color: #111827;
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+  .custom-actions {
+    display: flex;
+    gap: .5rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
   }
   .card {
     width: min(92vw, 560px);

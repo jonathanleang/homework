@@ -6,7 +6,7 @@
   let planned = null
   let result = null
   let sayWinner = true
-  const MIN_SEG = 2
+  const MIN_SEG = 1
   const MAX_SEG = 10000
   $: seg = Math.max(MIN_SEG, Math.min(MAX_SEG, Math.floor(segments || MIN_SEG)))
   $: step = 360 / seg
@@ -200,12 +200,14 @@
   }
   .pointer {
     position: absolute;
-    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -8px;
     width: 0;
     height: 0;
     border-left: 14px solid transparent;
     border-right: 14px solid transparent;
-    border-bottom: 22px solid #ef4444;
+    border-top: 22px solid #ef4444;
     z-index: 2;
     filter: drop-shadow(0 2px 1px rgba(0,0,0,.2));
   }

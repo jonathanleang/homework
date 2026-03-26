@@ -5,6 +5,7 @@
   import MathSubGame from './lib/MathSubGame.svelte'
   import MathMulGame from './lib/MathMulGame.svelte'
   import MathDivGame from './lib/MathDivGame.svelte'
+  import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -80,6 +81,11 @@
           <h2>Divide</h2>
           <p>Practice division</p>
         </button>
+        <button class="card" on:click={() => setView('word-missing')}>
+          <div class="thumb word-thumb">A</div>
+          <h2>Missing Letter</h2>
+          <p>Pick the missing letter</p>
+        </button>
       </div>
     </section>
   {:else if view === 'find'}
@@ -134,6 +140,11 @@
       <button on:click={() => setView('menu')}>Menu</button>
     </nav>
     <MathDivGame />
+  {:else if view === 'word-missing'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')}>Menu</button>
+    </nav>
+    <WordMissingLetterGame />
   {/if}
 </main>
 
@@ -275,6 +286,17 @@
     border-radius: 18px;
     border: 3px solid #111827;
     background: linear-gradient(180deg, #c7d2fe, #fecaca);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .word-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #bbf7d0, #fde68a);
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 900;
     color: #111827;

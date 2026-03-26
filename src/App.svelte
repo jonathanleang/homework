@@ -47,7 +47,6 @@
 <main>
   {#if view === 'menu'}
     <section class="menu">
-      <h1>Games</h1>
       <div class="cards">
         <button class="card" on:click={() => setView('find')}>
           <img src={`${base}star.svg`} alt="" class="thumb" />
@@ -107,19 +106,11 @@
     <nav class="topbar">
       <button on:click={() => setView('menu')}>Menu</button>
     </nav>
-    <header>
-      <h1>Adding</h1>
-      <p>Pick a level and solve the problems</p>
-    </header>
     <MathAddGame />
   {:else if view === 'minus'}
     <nav class="topbar">
       <button on:click={() => setView('menu')}>Menu</button>
     </nav>
-    <header>
-      <h1>Minus</h1>
-      <p>Pick a level and solve the problems</p>
-    </header>
     <MathSubGame />
   {/if}
 </main>
@@ -132,18 +123,22 @@
     padding: 2rem;
     display: grid;
     gap: 1.5rem;
+    align-content: start;
   }
   .topbar {
     display: flex;
     gap: .75rem;
     justify-content: center;
+    align-items: center;
+    align-self: start;
   }
   .topbar button {
-    padding: .5rem 1rem;
+    padding: .35rem .75rem;
     border-radius: .6rem;
     border: 1px solid #e5e7eb;
     background: #f9fafb;
     color: #111827;
+    line-height: 1.2;
   }
   header {
     display: grid;
@@ -157,11 +152,11 @@
   }
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: .75rem;
   }
   .card {
-    padding: 1rem;
+    padding: .85rem;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     background: #ffffff;

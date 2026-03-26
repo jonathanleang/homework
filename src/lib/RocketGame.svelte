@@ -12,8 +12,9 @@
   let rocketY = 0;
   let rocketVy = 0;
   
-  const gravity = -0.5;
-  const boost = 15;
+  const gravity = -0.25;
+  const boost = 12;
+  const objectDistance = 90; // Closer objects so it's easier to hit fuel
   
   let cameraY = 0;
   let objects = [];
@@ -60,8 +61,8 @@
       score = Math.floor(cameraY);
     }
 
-    // Fall down = game over
-    if (rocketY < cameraY - 50) {
+    // Fall down = game over (give a bit more leeway before dying)
+    if (rocketY < cameraY - 100) {
       gameState = 'gameover';
     }
 
@@ -71,30 +72,30 @@
       let fuelLane = Math.floor(Math.random() * 3);
       objects.push({ id: objectIdCounter++, type: 'fuel', lane: fuelLane, y: nextSpawnY, hit: false });
       
-      // Optionally spawn a rock in a different lane
-      if (Math.random() < 0.5) {
+      // Optionally spawn a rock in a different lane (less often to make it easier)
+      if (Math.random() < 0.3) {
          let rockLane = Math.floor(Math.random() * 3);
          if (rockLane !== fuelLane) {
             objects.push({ id: objectIdCounter++, type: 'rock', lane: rockLane, y: nextSpawnY, hit: false });
          }
       }
       
-      // Distance between objects (must be reachable with boost=15, gravity=-0.5 => max height 225)
-      nextSpawnY += 120;
+      // Distance between objects
+      nextSpawnY += objectDistance;
     }
 
     // Collision detection
     for (let obj of objects) {
       if (!obj.hit && obj.lane === rocketLane) {
         // Simple Y distance check
-        if (Math.abs(obj.y - rocketY) < 60) {
+        if (Math.abs(obj.y - rocketY) < 70) { // Slightly larger hitbox for easier catching
           obj.hit = true;
           if (obj.type === 'fuel') {
             rocketVy = boost; // Boost up!
           } else if (obj.type === 'rock') {
             lives -= 1;
             if (lives < 0) lives = 0;
-            rocketVy = boost * 0.6; // Small bounce to not die instantly from falling
+            rocketVy = boost * 0.8; // Bigger bounce on hit so you don't instantly die
             if (lives <= 0) {
               gameState = 'gameover';
             }

@@ -172,13 +172,16 @@
 
 <style>
   main {
-    min-height: 100dvh;
+    min-height: 100vh;
     max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
-    align-content: start;
+    align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
   }
   .topbar {
     position: fixed;
@@ -219,6 +222,7 @@
     gap: 1rem;
     text-align: center;
     width: 100%;
+    margin: 0 auto;
   }
   .cards {
     display: grid;

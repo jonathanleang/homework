@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import SpinWheel from './lib/SpinWheel.svelte'
   import MathAddGame from './lib/MathAddGame.svelte'
+  import MathSubGame from './lib/MathSubGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -63,6 +64,11 @@
           <h2>Adding</h2>
           <p>Practice addition levels</p>
         </button>
+        <button class="card" on:click={() => setView('minus')}>
+          <div class="thumb minus-thumb">−</div>
+          <h2>Minus</h2>
+          <p>Practice subtraction levels</p>
+        </button>
       </div>
     </section>
   {:else if view === 'find'}
@@ -106,6 +112,15 @@
       <p>Pick a level and solve the problems</p>
     </header>
     <MathAddGame />
+  {:else if view === 'minus'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')}>Menu</button>
+    </nav>
+    <header>
+      <h1>Minus</h1>
+      <p>Pick a level and solve the problems</p>
+    </header>
+    <MathSubGame />
   {/if}
 </main>
 
@@ -182,6 +197,17 @@
     border-radius: 18px;
     border: 3px solid #111827;
     background: linear-gradient(180deg, #bbf7d0, #93c5fd);
+    font-size: 3rem;
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .minus-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #fecaca, #fef08a);
     font-size: 3rem;
     font-weight: 900;
     color: #111827;

@@ -104,18 +104,7 @@
                 ? 9
                 : 10
 
-  function recomputeLayout() {
-    if (!boardEl) return
-    if (!cards.length) return
-    const rows = Math.ceil(cards.length / cols)
-    const rect = boardEl.getBoundingClientRect()
-    const availH = Math.max(160, window.innerHeight - rect.top - (finished ? 170 : 24))
-    const availW = Math.min(window.innerWidth * 0.92, 760)
-    const sizeW = (availW - GAP * (cols - 1)) / cols
-    const sizeH = (availH - GAP * (rows - 1)) / rows
-    const next = Math.floor(Math.max(34, Math.min(sizeW, sizeH)))
-    if (Number.isFinite(next) && next > 0 && next !== cardSize) cardSize = next
-  }
+  $: rows = totalCards ? Math.ceil(totalCards / cols) : 1
 
   function reset() {
     let count
@@ -184,20 +173,18 @@
   }
 
   function onResize() {
-    recomputeLayout()
+    // recompute no longer needed
   }
 
   onMount(() => {
     reset()
-    window.addEventListener('resize', onResize)
   })
 
   afterUpdate(() => {
-    recomputeLayout()
+    // layout is CSS driven
   })
 
   onDestroy(() => {
-    window.removeEventListener('resize', onResize)
   })
 </script>
 
@@ -216,15 +203,18 @@
         </select>
       </label>
       {#if preset === 'custom'}
-        <input 
-          type="number" 
-          bind:value={customCards} 
-          on:change={reset} 
-          min="4" 
-          max="90" 
-          step="2" 
-          class="custom-input"
-        />
+        <label class="sel" style="margin-left: 4px;">
+          <span>Qty:</span>
+          <input 
+            type="number" 
+            bind:value={customCards} 
+            on:change={reset} 
+            min="4" 
+            max="90" 
+            step="2" 
+            class="custom-input"
+          />
+        </label>
       {/if}
       <button on:click={reset}>New Game</button>
     </div>
@@ -232,7 +222,7 @@
   </div>
 
   <div class="board-wrap">
-    <div class="board" bind:this={boardEl} style="--cols: {cols}; --size: {cardSize}px; --gap: {GAP}px">
+    <div class="board" bind:this={boardEl} style="--cols: {cols}; --rows: {rows}; --gap: {GAP}px">
       {#each cards as c, i (c.id)}
         <button
           class="card"
@@ -330,13 +320,17 @@
   }
   .board {
     display: inline-grid;
-    grid-template-columns: repeat(var(--cols), var(--size));
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
     gap: var(--gap);
     max-width: 92vw;
+    --max-w: calc((92vw - (var(--cols) - 1) * var(--gap)) / var(--cols));
+    --max-h: calc((100vh - 280px - (var(--rows) - 1) * var(--gap)) / var(--rows));
+    --card-size: min(var(--max-w), var(--max-h), 120px);
   }
   .card {
-    width: var(--size);
-    height: var(--size);
+    width: var(--card-size);
+    height: var(--card-size);
     border-radius: 14px;
     border: 2px solid #e5e7eb;
     background: transparent;
@@ -367,12 +361,12 @@
   }
   .back {
     background: linear-gradient(180deg, #c7d2fe, #fde68a);
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-size: calc(var(--card-size) * 0.4);
   }
   .front {
     transform: rotateY(180deg);
     background: #ffffff;
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-size: calc(var(--card-size) * 0.5);
   }
   .card.matched {
     border-color: #86efac;

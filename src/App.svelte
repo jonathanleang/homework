@@ -7,6 +7,7 @@
   import MathDivGame from './lib/MathDivGame.svelte'
   import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
   import MemoryGame from './lib/MemoryGame.svelte'
+  import RocketGame from './lib/RocketGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -92,11 +93,16 @@
           <h2>Memory Cards</h2>
           <p>Match the animals</p>
         </button>
+        <button class="card" on:click={() => setView('rocket')}>
+          <div class="thumb rocket-thumb">🚀</div>
+          <h2>Rocket Jump</h2>
+          <p>Fly up and avoid rocks</p>
+        </button>
       </div>
     </section>
   {:else if view === 'find'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <header>
       <h1>Find the Star</h1>
@@ -119,7 +125,7 @@
     </section>
   {:else if view === 'wheel'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <header>
       <h1>Spin the Wheel</h1>
@@ -128,34 +134,39 @@
     <SpinWheel />
   {:else if view === 'math'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <MathAddGame />
   {:else if view === 'minus'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <MathSubGame />
   {:else if view === 'multiply'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <MathMulGame />
   {:else if view === 'divide'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <MathDivGame />
   {:else if view === 'word-missing'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <WordMissingLetterGame />
   {:else if view === 'memory'}
     <nav class="topbar">
-      <button on:click={() => setView('menu')}>Menu</button>
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <MemoryGame />
+  {:else if view === 'rocket'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <RocketGame />
   {/if}
 </main>
 
@@ -170,19 +181,33 @@
     align-content: start;
   }
   .topbar {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 50;
     display: flex;
     gap: .75rem;
     justify-content: center;
     align-items: center;
-    align-self: start;
   }
   .topbar button {
-    padding: .35rem .75rem;
-    border-radius: .6rem;
+    padding: .5rem;
+    border-radius: 50%;
     border: 1px solid #e5e7eb;
-    background: #f9fafb;
+    background: #ffffff;
     color: #111827;
-    line-height: 1.2;
+    line-height: 1;
+    font-size: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .topbar button:active {
+    transform: scale(0.95);
   }
   header {
     display: grid;
@@ -322,6 +347,17 @@
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 900;
     color: #111827;
+    line-height: 1;
+  }
+  .rocket-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #38bdf8, #0f172a);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: white;
     line-height: 1;
   }
   .stats {

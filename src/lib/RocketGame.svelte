@@ -12,12 +12,12 @@
   let rocketY = 0;
   let rocketVy = 0;
   
-  const gravity = -0.4;
-  const boost = 12;
+  const gravity = -0.5;
+  const boost = 15;
   
   let cameraY = 0;
   let objects = [];
-  let nextSpawnY = 200;
+  let nextSpawnY = 300;
   let animationFrame;
   let objectIdCounter = 0;
   let lastTime;
@@ -31,7 +31,7 @@
     rocketVy = boost;
     cameraY = 0;
     objects = [];
-    nextSpawnY = 300;
+    nextSpawnY = 350;
     
     // Initial fuel so player doesn't instantly die
     objects.push({ id: objectIdCounter++, type: 'fuel', lane: 1, y: 200, hit: false });
@@ -46,12 +46,11 @@
 
     lastTime = time;
 
-    // Time independent physics (simplified for ~60fps)
     rocketVy += gravity;
     rocketY += rocketVy;
 
     // Camera follows rocket if it goes too high
-    const targetCameraY = rocketY - containerHeight * 0.3;
+    const targetCameraY = rocketY - containerHeight * 0.4;
     if (targetCameraY > cameraY) {
       cameraY = targetCameraY;
     }
@@ -67,27 +66,35 @@
     }
 
     // Spawn objects
-    while (nextSpawnY < cameraY + containerHeight + 200) {
-      let isRock = Math.random() < 0.25;
-      let type = isRock ? 'rock' : 'fuel';
-      let lane = Math.floor(Math.random() * 3);
-      objects.push({ id: objectIdCounter++, type, lane, y: nextSpawnY, hit: false });
+    while (nextSpawnY < cameraY + containerHeight + 300) {
+      // Always spawn at least 1 fuel per step so game is possible
+      let fuelLane = Math.floor(Math.random() * 3);
+      objects.push({ id: objectIdCounter++, type: 'fuel', lane: fuelLane, y: nextSpawnY, hit: false });
       
-      // Distance between objects
-      nextSpawnY += Math.random() * 100 + 80;
+      // Optionally spawn a rock in a different lane
+      if (Math.random() < 0.5) {
+         let rockLane = Math.floor(Math.random() * 3);
+         if (rockLane !== fuelLane) {
+            objects.push({ id: objectIdCounter++, type: 'rock', lane: rockLane, y: nextSpawnY, hit: false });
+         }
+      }
+      
+      // Distance between objects (must be reachable with boost=15, gravity=-0.5 => max height 225)
+      nextSpawnY += 120;
     }
 
     // Collision detection
     for (let obj of objects) {
       if (!obj.hit && obj.lane === rocketLane) {
         // Simple Y distance check
-        if (Math.abs(obj.y - rocketY) < 50) {
+        if (Math.abs(obj.y - rocketY) < 60) {
           obj.hit = true;
           if (obj.type === 'fuel') {
             rocketVy = boost; // Boost up!
           } else if (obj.type === 'rock') {
             lives -= 1;
-            rocketVy = boost * 0.5; // Small bounce to not die instantly from falling
+            if (lives < 0) lives = 0;
+            rocketVy = boost * 0.6; // Small bounce to not die instantly from falling
             if (lives <= 0) {
               gameState = 'gameover';
             }
@@ -97,7 +104,7 @@
     }
 
     // Cleanup old objects
-    objects = objects.filter(o => o.y > cameraY - 100 && !o.hit);
+    objects = objects.filter(o => o.y > cameraY - 200 && !o.hit);
 
     // Force Svelte to react
     objects = objects;
@@ -154,7 +161,7 @@
   <div class="ui">
     <div class="score">Score: {score}</div>
     <div class="lives">
-      {#each Array.from({length: lives}) as _}
+      {#each [1, 2, 3, 4, 5].slice(0, lives) as _}
         ❤️
       {/each}
     </div>
@@ -197,7 +204,8 @@
     position: relative;
     width: 100%;
     max-width: 500px;
-    height: 80vh;
+    height: 80dvh;
+    min-height: 400px;
     margin: 0 auto;
     background: #0f172a;
     border-radius: 16px;

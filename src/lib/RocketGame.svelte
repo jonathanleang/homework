@@ -12,9 +12,13 @@
   let rocketY = 0;
   let rocketVy = 0;
   
-  const gravity = -0.25;
-  const boost = 12;
-  const objectDistance = 90; // Closer objects so it's easier to hit fuel
+  const baseSpeed = 1.5; // Constant upward speed
+  const rockSlowdown = 1.0; // How much speed to lose per rock
+  const speedRecovery = 0.01; // How fast to recover speed back to baseSpeed over time
+  const maxSpeed = 3.0; // Max speed when hitting fuel
+  const fuelBoost = 0.8; // Speed added when hitting fuel
+  
+  const objectDistance = 120; // Distance between spawned objects
   
   let cameraY = 0;
   let objects = [];
@@ -29,14 +33,11 @@
     lives = 3;
     rocketLane = 1;
     rocketY = 200;
-    rocketVy = boost;
+    rocketVy = baseSpeed;
     cameraY = 0;
     objects = [];
     nextSpawnY = 350;
     
-    // Initial fuel so player doesn't instantly die
-    objects.push({ id: objectIdCounter++, type: 'fuel', lane: 1, y: 200, hit: false });
-
     if (animationFrame) cancelAnimationFrame(animationFrame);
     lastTime = performance.now();
     animationFrame = requestAnimationFrame(update);
@@ -47,7 +48,15 @@
 
     lastTime = time;
 
-    rocketVy += gravity;
+    // Slowly recover or decay speed back to baseSpeed
+    if (rocketVy < baseSpeed) {
+      rocketVy += speedRecovery;
+      if (rocketVy > baseSpeed) rocketVy = baseSpeed;
+    } else if (rocketVy > baseSpeed) {
+      rocketVy -= speedRecovery; // Decay boost smoothly
+      if (rocketVy < baseSpeed) rocketVy = baseSpeed;
+    }
+
     rocketY += rocketVy;
 
     // Camera follows rocket if it goes too high
@@ -61,9 +70,14 @@
       score = Math.floor(cameraY);
     }
 
-    // Fall down = game over (give a bit more leeway before dying)
+    // Fall down = game over
     if (rocketY < cameraY - 100) {
       gameState = 'gameover';
+    }
+
+    // Stop from falling endlessly without gameover
+    if (rocketVy < -2.0) {
+      rocketVy = -2.0;
     }
 
     // Spawn objects
@@ -91,11 +105,12 @@
         if (Math.abs(obj.y - rocketY) < 70) { // Slightly larger hitbox for easier catching
           obj.hit = true;
           if (obj.type === 'fuel') {
-            rocketVy = boost; // Boost up!
+            rocketVy += fuelBoost;
+            if (rocketVy > maxSpeed) rocketVy = maxSpeed;
           } else if (obj.type === 'rock') {
             lives -= 1;
             if (lives < 0) lives = 0;
-            rocketVy = boost * 0.8; // Bigger bounce on hit so you don't instantly die
+            rocketVy -= rockSlowdown; 
             if (lives <= 0) {
               gameState = 'gameover';
             }
@@ -258,7 +273,7 @@
     font-size: 3rem;
     transform: translateX(-50%);
     z-index: 6;
-    transition: left 0.1s ease-out;
+    transition: left 0.3s ease-out; /* Made transition slower to match game speed */
   }
 
   .rocket.falling {

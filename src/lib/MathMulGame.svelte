@@ -9,7 +9,7 @@
   let autoNext = 0
   let timer = null
   let history = []
-  const HISTORY_KEY = 'sub_history'
+  const HISTORY_KEY = 'mul_history'
   let mc = false
   let choices = []
   $: total = history.length
@@ -19,66 +19,58 @@
   const TARGET = 10
   let levelCorrect = 0
   let finished = false
-  const PROGRESS_KEY = 'sub_progress'
+  const PROGRESS_KEY = 'mul_progress'
   let showHistory = true
-  const HISTORY_VIS_KEY = 'sub_history_show'
+  const HISTORY_VIS_KEY = 'mul_history_show'
 
   function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
   }
 
-  function pickNoBorrowTwoDigitPair() {
-    const tensA = randInt(1, 9)
-    const tensB = randInt(0, tensA)
-    const onesA = randInt(0, 9)
-    const onesB = randInt(0, onesA)
-    return [tensA * 10 + onesA, tensB * 10 + onesB]
-  }
-
-  function pickBorrowTwoDigitPair() {
-    const onesA = randInt(0, 8)
-    const onesB = randInt(onesA + 1, 9)
-    const tensA = randInt(1, 9)
-    const tensB = randInt(0, tensA - 1)
-    return [tensA * 10 + onesA, tensB * 10 + onesB]
-  }
-
-  function clearTimer() {
+  function newProblem() {
     if (timer) {
       clearInterval(timer)
       timer = null
     }
     autoNext = 0
-  }
-
-  function newProblem() {
-    clearTimer()
     message = ''
     isCorrect = false
     answer = ''
     if (level === '1') {
-      a = randInt(0, 9)
-      b = randInt(0, a)
+      a = randInt(1, 9)
+      b = randInt(1, 9)
       regenChoices()
       return
     }
     if (level === '2') {
-      a = randInt(10, 99)
-      b = randInt(0, 9)
+      const single = randInt(1, 9)
+      const two = randInt(10, 99)
+      if (Math.random() < 0.5) {
+        a = single
+        b = two
+      } else {
+        a = two
+        b = single
+      }
       regenChoices()
       return
     }
     if (level === '3') {
-      ;[a, b] = pickNoBorrowTwoDigitPair()
+      a = randInt(10, 20)
+      b = randInt(10, 20)
       regenChoices()
       return
     }
-    ;[a, b] = pickBorrowTwoDigitPair()
+    a = randInt(20, 30)
+    b = randInt(10, 20)
     regenChoices()
   }
 
   function startAutoNext() {
-    clearTimer()
+    if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
     autoNext = 5
     timer = setInterval(() => {
       autoNext -= 1
@@ -105,11 +97,12 @@
     return arr
   }
   function regenChoices() {
-    const correct = a - b
+    const correct = a * b
     const set = new Set([correct])
     while (set.size < 4) {
       const delta = randInt(-10, 10)
       let v = correct + delta
+      if (v < 0) v = 0
       set.add(v)
     }
     choices = shuffle(Array.from(set))
@@ -167,7 +160,7 @@
   function check() {
     const n = parseInt(answer, 10)
     if (!Number.isFinite(n)) return
-    const correct = a - b
+    const correct = a * b
     const ok = n === correct
     history = [
       ...history,
@@ -176,14 +169,14 @@
         level,
         a,
         b,
-        op: '−',
+        op: '×',
         answer: Number.isFinite(n) ? n : null,
         expected: correct,
         correct: ok,
       },
     ].slice(-50)
     saveHistory()
-    if (n === correct) {
+    if (ok) {
       isCorrect = true
       message = 'Correct!'
       speak('correct')
@@ -199,7 +192,10 @@
           return
         }
         finished = true
-        clearTimer()
+        if (timer) {
+          clearInterval(timer)
+          timer = null
+        }
         speak('winner')
         return
       }
@@ -210,7 +206,11 @@
       speak('wrong')
       levelCorrect = 0
       saveProgress()
-      clearTimer()
+      if (timer) {
+        clearInterval(timer)
+        timer = null
+      }
+      autoNext = 0
     }
   }
   function pickChoice(c) {
@@ -220,12 +220,12 @@
 
   $: levelTitle =
     level === '1'
-      ? 'Level 1: single digit - single digit'
+      ? 'Level 1: single digit × single digit'
       : level === '2'
-        ? 'Level 2: two digit - single digit'
+        ? 'Level 2: two digit × single digit'
         : level === '3'
-          ? 'Level 3: two digit - two digit (no borrow)'
-          : 'Level 4: two digit - two digit (with borrow)'
+          ? 'Level 3: two digit × two digit'
+          : 'Level 4: larger numbers'
 
   onMount(() => {
     loadProgress()
@@ -241,7 +241,7 @@
 
 <section class="wrap">
   <div class="top">
-    <div class="title">Minus</div>
+    <div class="title">Multiply</div>
     <label class="level">
       <span>Level</span>
       <select bind:value={level} on:change={() => { resetProgressToLevel(level); regenChoices(); newProblem() }}>
@@ -261,7 +261,7 @@
 
   {#if !finished}
   <div class="card">
-    <div class="problem" aria-label="problem">{a} − {b} = ?</div>
+    <div class="problem" aria-label="problem">{a} × {b} = ?</div>
 
     <div class="answer-row">
       {#if !mc}
@@ -318,7 +318,7 @@
       <ul>
         {#each [...history].reverse() as h, i}
           <li class:ok={h.correct}>
-            <span class="q">{h.a} − {h.b} = {h.answer}</span>
+            <span class="q">{h.a} × {h.b} = {h.answer}</span>
             <span class="r">{h.correct ? 'correct' : `wrong (=${h.expected})`}</span>
             <span class="lv">L{h.level}</span>
           </li>
@@ -454,18 +454,18 @@
     color: #111827;
     font-size: .9rem;
   }
-  .history .toggle {
-    padding: .3rem .6rem;
-    border-radius: .5rem;
-    border: 1px solid #e5e7eb;
-    background: #eef2ff;
-    color: #111827;
-  }
   .history .clear {
     padding: .3rem .6rem;
     border-radius: .5rem;
     border: 1px solid #e5e7eb;
     background: #f9fafb;
+    color: #111827;
+  }
+  .history .toggle {
+    padding: .3rem .6rem;
+    border-radius: .5rem;
+    border: 1px solid #e5e7eb;
+    background: #eef2ff;
     color: #111827;
   }
   .history ul {

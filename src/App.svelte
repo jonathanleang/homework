@@ -3,6 +3,8 @@
   import SpinWheel from './lib/SpinWheel.svelte'
   import MathAddGame from './lib/MathAddGame.svelte'
   import MathSubGame from './lib/MathSubGame.svelte'
+  import MathMulGame from './lib/MathMulGame.svelte'
+  import MathDivGame from './lib/MathDivGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -68,6 +70,16 @@
           <h2>Minus</h2>
           <p>Practice subtraction levels</p>
         </button>
+        <button class="card" on:click={() => setView('multiply')}>
+          <div class="thumb mul-thumb">×</div>
+          <h2>Multiply</h2>
+          <p>Practice multiplication</p>
+        </button>
+        <button class="card" on:click={() => setView('divide')}>
+          <div class="thumb div-thumb">÷</div>
+          <h2>Divide</h2>
+          <p>Practice division</p>
+        </button>
       </div>
     </section>
   {:else if view === 'find'}
@@ -112,13 +124,23 @@
       <button on:click={() => setView('menu')}>Menu</button>
     </nav>
     <MathSubGame />
+  {:else if view === 'multiply'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')}>Menu</button>
+    </nav>
+    <MathMulGame />
+  {:else if view === 'divide'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')}>Menu</button>
+    </nav>
+    <MathDivGame />
   {/if}
 </main>
 
 <style>
   main {
     min-height: 100dvh;
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem;
     display: grid;
@@ -149,11 +171,36 @@
     display: grid;
     gap: 1rem;
     text-align: center;
+    width: 100%;
   }
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    grid-template-columns: 1fr;
     gap: .75rem;
+    width: 100%;
+  }
+  @media (min-width: 560px) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .9rem;
+    }
+  }
+  @media (min-width: 840px) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+  @media (min-width: 1100px) {
+    .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.1rem;
+    }
+  }
+  @media (max-width: 480px) {
+    main {
+      padding: 1rem;
+    }
   }
   .card {
     padding: .85rem;
@@ -166,6 +213,12 @@
     transition: transform .12s ease, border-color .2s ease, background .2s ease;
     cursor: pointer;
   }
+  .card h2 {
+    font-size: clamp(1rem, 1.2vw + .9rem, 1.25rem);
+  }
+  .card p {
+    font-size: clamp(.85rem, 1vw + .7rem, 1rem);
+  }
   .card h2,
   .card p {
     color: #111827;
@@ -175,13 +228,10 @@
     border-color: #c7d2fe;
     background: #f8fafc;
   }
-  .thumb {
-    width: 84px;
-    height: 84px;
-  }
+  .thumb { width: clamp(64px, 9vw, 96px); height: clamp(64px, 9vw, 96px); }
   .wheel-thumb {
-    width: 84px;
-    height: 84px;
+    width: clamp(64px, 9vw, 96px);
+    height: clamp(64px, 9vw, 96px);
     border-radius: 50%;
     border: 3px solid #111827;
     background: conic-gradient(#fde68a 0 45deg, #fca5a5 45deg 90deg, #fde68a 90deg 135deg, #fca5a5 135deg 180deg, #fde68a 180deg 225deg, #fca5a5 225deg 270deg, #fde68a 270deg 315deg, #fca5a5 315deg 360deg);
@@ -192,7 +242,7 @@
     border-radius: 18px;
     border: 3px solid #111827;
     background: linear-gradient(180deg, #bbf7d0, #93c5fd);
-    font-size: 3rem;
+    font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 900;
     color: #111827;
     line-height: 1;
@@ -203,7 +253,29 @@
     border-radius: 18px;
     border: 3px solid #111827;
     background: linear-gradient(180deg, #fecaca, #fef08a);
-    font-size: 3rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .mul-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #fde68a, #86efac);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .div-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #c7d2fe, #fecaca);
+    font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 900;
     color: #111827;
     line-height: 1;

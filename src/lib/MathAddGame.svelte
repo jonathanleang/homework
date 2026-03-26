@@ -16,7 +16,7 @@
   $: correctCount = history.reduce((n, h) => n + (h.correct ? 1 : 0), 0)
   $: wrongCount = total - correctCount
   $: correctPct = total ? Math.round((correctCount / total) * 100) : 0
-  const TARGET = 30
+  const TARGET = 10
   let levelCorrect = 0
   let finished = false
   const PROGRESS_KEY = 'add_progress'
@@ -206,6 +206,7 @@
           return
         }
         finished = true
+        autoNext = 0
         if (timer) {
           clearInterval(timer)
           timer = null
@@ -218,6 +219,8 @@
       isCorrect = false
       message = `Try again. Answer is ${correct}.`
       speak('wrong')
+      levelCorrect = 0
+      saveProgress()
       if (timer) {
         clearInterval(timer)
         timer = null
@@ -268,7 +271,7 @@
       <input type="checkbox" bind:checked={mc} on:change={regenChoices} />
       <span>Multiple choice</span>
     </label>
-    <div class="desc">Progress: {levelCorrect}/{TARGET}</div>
+    <div class="desc">Streak: {levelCorrect}/{TARGET}</div>
   </div>
 
   {#if !finished}

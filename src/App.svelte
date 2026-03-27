@@ -10,6 +10,7 @@
   import RocketGame from './lib/RocketGame.svelte'
   import YouTubePlayer from './lib/YouTubePlayer.svelte'
   import WhackAMoleGame from './lib/WhackAMoleGame.svelte'
+  import DiggingGame from './lib/DiggingGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -100,6 +101,11 @@
           <h2>Rocket Jump</h2>
           <p>Fly up and avoid rocks</p>
         </button>
+        <button class="card" on:click={() => setView('dig')}>
+          <div class="thumb dig-thumb">⛏️</div>
+          <h2>Digging Game</h2>
+          <p>Find diamonds, avoid lava</p>
+        </button>
         <button class="card" on:click={() => setView('youtube')}>
           <div class="thumb yt-thumb"><span class="yt-play"></span></div>
           <h2>Video</h2>
@@ -114,6 +120,11 @@
           <div class="thumb yt-thumb"><span class="yt-play"></span></div>
           <h2>Video</h2>
           <p>Animal Classification</p>
+        </button>
+        <button class="card" on:click={() => setView('fishguys')}>
+          <div class="thumb yt-thumb"><span class="yt-play"></span></div>
+          <h2>Channel</h2>
+          <p>The Fish Guys</p>
         </button>
         <button class="card" on:click={() => setView('whack')}>
           <div class="thumb memory-thumb">🔨</div>
@@ -209,6 +220,16 @@
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <YouTubePlayer videoId="P9ptHAClC4Q" />
+  {:else if view === 'fishguys'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <YouTubePlayer videoId="iH9jDCB2M3M" />
+  {:else if view === 'dig'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <DiggingGame />
   {/if}
 </main>
 
@@ -409,6 +430,17 @@
     border-radius: 18px;
     border: 3px solid #111827;
     background: linear-gradient(180deg, #c7d2fe, #bbf7d0);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+  }
+  .dig-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #fbbf24, #78350f);
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 900;
     color: #111827;

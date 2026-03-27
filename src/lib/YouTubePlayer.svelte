@@ -1,11 +1,17 @@
 <script>
   export let videoId = 'wa6Itbqw29g'
+  export let src = ''
+
+  $: iframeSrc =
+    src && String(src).trim().length > 0
+      ? String(src)
+      : 'https://www.youtube.com/embed/' + videoId + '?rel=0&modestbranding=1&playsinline=1'
 </script>
 
 <div class="wrap">
   <div class="player">
     <iframe
-      src={"https://www.youtube.com/embed/" + videoId + "?rel=0&modestbranding=1&playsinline=1"}
+      src={iframeSrc}
       title="YouTube video player"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowfullscreen

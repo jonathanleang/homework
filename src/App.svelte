@@ -8,6 +8,7 @@
   import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
   import MemoryGame from './lib/MemoryGame.svelte'
   import RocketGame from './lib/RocketGame.svelte'
+  import WhackAMoleGame from './lib/WhackAMoleGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
   let grid = 4
@@ -98,6 +99,11 @@
           <h2>Rocket Jump</h2>
           <p>Fly up and avoid rocks</p>
         </button>
+        <button class="card" on:click={() => setView('whack')}>
+          <div class="thumb memory-thumb">🔨</div>
+          <h2>Whack-a-Pest</h2>
+          <p>Smash the pests</p>
+        </button>
       </div>
     </section>
   {:else if view === 'find'}
@@ -167,6 +173,11 @@
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <RocketGame />
+  {:else if view === 'whack'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <WhackAMoleGame />
   {/if}
 </main>
 

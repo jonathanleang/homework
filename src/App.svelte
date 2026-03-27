@@ -8,6 +8,7 @@
   import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
   import MemoryGame from './lib/MemoryGame.svelte'
   import RocketGame from './lib/RocketGame.svelte'
+  import YouTubePlayer from './lib/YouTubePlayer.svelte'
   import WhackAMoleGame from './lib/WhackAMoleGame.svelte'
   const base = import.meta.env.BASE_URL
   let view = 'menu'
@@ -99,6 +100,21 @@
           <h2>Rocket Jump</h2>
           <p>Fly up and avoid rocks</p>
         </button>
+        <button class="card" on:click={() => setView('youtube')}>
+          <div class="thumb yt-thumb"><span class="yt-play"></span></div>
+          <h2>Video</h2>
+          <p>Numberblocks: Shapes</p>
+        </button>
+        <button class="card" on:click={() => setView('youtube2')}>
+          <div class="thumb yt-thumb"><span class="yt-play"></span></div>
+          <h2>Video</h2>
+          <p>Bluey: 2 Hours</p>
+        </button>
+        <button class="card" on:click={() => setView('youtube3')}>
+          <div class="thumb yt-thumb"><span class="yt-play"></span></div>
+          <h2>Video</h2>
+          <p>Animal Classification</p>
+        </button>
         <button class="card" on:click={() => setView('whack')}>
           <div class="thumb memory-thumb">🔨</div>
           <h2>Whack-a-Pest</h2>
@@ -178,6 +194,21 @@
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <WhackAMoleGame />
+  {:else if view === 'youtube'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <YouTubePlayer videoId="wa6Itbqw29g" />
+  {:else if view === 'youtube2'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <YouTubePlayer videoId="aP-qKaig84M" />
+  {:else if view === 'youtube3'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <YouTubePlayer videoId="P9ptHAClC4Q" />
   {/if}
 </main>
 
@@ -297,6 +328,25 @@
     border-radius: 50%;
     border: 3px solid #111827;
     background: conic-gradient(#fde68a 0 45deg, #fca5a5 45deg 90deg, #fde68a 90deg 135deg, #fca5a5 135deg 180deg, #fde68a 180deg 225deg, #fca5a5 225deg 270deg, #fde68a 270deg 315deg, #fca5a5 315deg 360deg);
+  }
+  .yt-thumb {
+    width: clamp(64px, 9vw, 96px);
+    height: clamp(48px, 7vw, 72px);
+    border-radius: 14px;
+    background: #ff0000;
+    border: 3px solid #111827;
+    display: grid;
+    place-items: center;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15) inset;
+  }
+  .yt-thumb .yt-play {
+    width: 0;
+    height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 20px solid #ffffff;
+    transform: translateX(2px);
   }
   .math-thumb {
     display: grid;

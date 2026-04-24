@@ -6,6 +6,8 @@
   import MathMulGame from './lib/MathMulGame.svelte'
   import MathDivGame from './lib/MathDivGame.svelte'
   import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
+  import AlphabetOrderGame from './lib/AlphabetOrderGame.svelte'
+  import CopybookStrokeGame from './lib/CopybookStrokeGame.svelte'
   import MemoryGame from './lib/MemoryGame.svelte'
   import RocketGame from './lib/RocketGame.svelte'
   import YouTubePlayer from './lib/YouTubePlayer.svelte'
@@ -90,6 +92,16 @@
           <div class="thumb word-thumb">A</div>
           <h2>Missing Letter</h2>
           <p>Pick the missing letter</p>
+        </button>
+        <button class="card" on:click={() => setView('abc-order')}>
+          <div class="thumb abc-thumb">ABC</div>
+          <h2>ABC Order</h2>
+          <p>Tap letters in order</p>
+        </button>
+        <button class="card" on:click={() => setView('copybook')}>
+          <div class="thumb abc-thumb">✍️</div>
+          <h2>Copybook Letters</h2>
+          <p>Trace strokes in order</p>
         </button>
         <button class="card" on:click={() => setView('memory')}>
           <div class="thumb memory-thumb">🐶</div>
@@ -190,6 +202,16 @@
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <WordMissingLetterGame />
+  {:else if view === 'abc-order'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <AlphabetOrderGame />
+  {:else if view === 'copybook'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <CopybookStrokeGame />
   {:else if view === 'memory'}
     <nav class="topbar">
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
@@ -423,6 +445,18 @@
     font-weight: 900;
     color: #111827;
     line-height: 1;
+  }
+  .abc-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #93c5fd, #fde68a);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
+    letter-spacing: 0.08em;
   }
   .memory-thumb {
     display: grid;

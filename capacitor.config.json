@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.kidshomework",
+  "appName": "Kids Homework",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

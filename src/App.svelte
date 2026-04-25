@@ -8,6 +8,7 @@
   import WordMissingLetterGame from './lib/WordMissingLetterGame.svelte'
   import AlphabetOrderGame from './lib/AlphabetOrderGame.svelte'
   import CopybookStrokeGame from './lib/CopybookStrokeGame.svelte'
+  import CopybookPrintGame from './lib/CopybookPrintGame.svelte'
   import MemoryGame from './lib/MemoryGame.svelte'
   import RocketGame from './lib/RocketGame.svelte'
   import YouTubePlayer from './lib/YouTubePlayer.svelte'
@@ -102,6 +103,11 @@
           <div class="thumb abc-thumb">✍️</div>
           <h2>Copybook Letters</h2>
           <p>Trace strokes in order</p>
+        </button>
+        <button class="card" on:click={() => setView('copybook-print')}>
+          <div class="thumb pen-thumb">✍️</div>
+          <h2>Print Copybook</h2>
+          <p>Better stroke order</p>
         </button>
         <button class="card" on:click={() => setView('memory')}>
           <div class="thumb memory-thumb">🐶</div>
@@ -212,6 +218,11 @@
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
     </nav>
     <CopybookStrokeGame />
+  {:else if view === 'copybook-print'}
+    <nav class="topbar">
+      <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
+    </nav>
+    <CopybookPrintGame />
   {:else if view === 'memory'}
     <nav class="topbar">
       <button on:click={() => setView('menu')} aria-label="Menu">🏠</button>
@@ -457,6 +468,17 @@
     color: #111827;
     line-height: 1;
     letter-spacing: 0.08em;
+  }
+  .pen-thumb {
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    border: 3px solid #111827;
+    background: linear-gradient(180deg, #fbcfe8, #bfdbfe);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: #111827;
+    line-height: 1;
   }
   .memory-thumb {
     display: grid;

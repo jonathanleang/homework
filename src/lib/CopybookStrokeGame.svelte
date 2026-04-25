@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onDestroy, onMount } from 'svelte'
 
   const SETTINGS_KEY = 'copybook_stroke_settings'
   const SCORE_KEY = 'copybook_stroke_score'
@@ -13,7 +13,6 @@
     'JIVED FOX NYMPH GRABS QUICK WALTZ'.toUpperCase()
   ]
 
-  /** @type {Record<string, { name: string, strokes: number[][][] }>} */
   const LETTERS = {
     A: { name: 'A', strokes: [[[20, 90], [50, 10], [80, 90]], [[32, 60], [68, 60]]] },
     B: { name: 'B', strokes: [[[25, 10], [25, 90]], [[25, 10], [65, 25], [25, 45]], [[25, 45], [70, 65], [25, 90]]] },
@@ -50,10 +49,11 @@
   let sayLetter = true
   let tolerance = 18
   let score = 0
+  let didMount = false
+  let finishTimer = null
 
   let svgEl
   let drawing = false
-  /** @type {{x:number,y:number}[]} */
   let trail = []
   let lastT = 0
   let bad = false
@@ -93,6 +93,19 @@
     } catch {}
     try {
       localStorage.setItem(SCORE_KEY, String(score))
+    } catch {}
+  }
+
+  function persist(nextSayLetter, nextTolerance, nextScore) {
+    if (!didMount) return
+    try {
+      localStorage.setItem(
+        SETTINGS_KEY,
+        JSON.stringify({ sayLetter: !!nextSayLetter, tolerance: nextTolerance })
+      )
+    } catch {}
+    try {
+      localStorage.setItem(SCORE_KEY, String(nextScore))
     } catch {}
   }
 
@@ -171,6 +184,9 @@
   function startDraw(e) {
     if (!svgEl) return
     e.preventDefault?.()
+    if (typeof e?.pointerId === 'number') {
+      svgEl.setPointerCapture?.(e.pointerId)
+    }
     drawing = true
     trail = []
     lastT = 0
@@ -209,9 +225,9 @@
     const totalStrokes = LETTERS[letter]?.strokes?.length || 0
     if (strokeIndex >= totalStrokes) {
       score += 1
-      save()
       message = 'Nice! Letter complete.'
-      setTimeout(() => pickNew(), 650)
+      if (finishTimer) clearTimeout(finishTimer)
+      finishTimer = setTimeout(() => pickNew(), 650)
     } else {
       message = `Great! Now stroke ${strokeIndex + 1}.`
     }
@@ -244,11 +260,19 @@
     return `M ${points.map((p) => `${p.x} ${p.y}`).join(' L ')}`
   }
 
-  $: save()
+  $: persist(sayLetter, tolerance, score)
 
   onMount(() => {
     load()
+    didMount = true
     pickNew()
+  })
+
+  onDestroy(() => {
+    if (finishTimer) {
+      clearTimeout(finishTimer)
+      finishTimer = null
+    }
   })
 </script>
 
@@ -328,12 +352,10 @@
           </filter>
         </defs>
 
-        <!-- guide lines -->
         <line x1="10" y1="20" x2="90" y2="20" class="guide" />
         <line x1="10" y1="50" x2="90" y2="50" class="guide mid" />
         <line x1="10" y1="90" x2="90" y2="90" class="guide" />
 
-        <!-- all strokes (grey) -->
         {#each (LETTERS[letter]?.strokes || []) as s, idx (idx)}
           <path
             d={strokePath(s)}
@@ -347,7 +369,6 @@
           {/if}
         {/each}
 
-        <!-- kid trail -->
         <path d={trailPath(trail)} class="trail" class:bad={bad} />
       </svg>
       <div class="hint">
@@ -595,4 +616,3 @@
     }
   }
 </style>
-
